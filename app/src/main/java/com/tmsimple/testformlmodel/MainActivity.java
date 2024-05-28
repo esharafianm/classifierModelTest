@@ -41,6 +41,7 @@ public class MainActivity extends AppCompatActivity {
         EditText editTextFootMax = findViewById(R.id.editTextFootMax);
         EditText editTextFootMin = findViewById(R.id.editTextFootMin);
         TextView output = findViewById(R.id.output);
+        TextView output2 = findViewById(R.id.output2);
         Button buttonPredict = findViewById(R.id.buttonPredict);
 
         // Setup button click listener
@@ -60,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
                 input[0][3] = footMin;
 
                 // Array to hold model output
-                float[][] outputVal = new float[1][3];
+                float[][] outputVal = new float[1][5];
 
                 // Run inference
                 if (tflite != null) {
@@ -68,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 // Interpret the output
-                String[] classLabels = {"Downstairs", "Upstairs", "Walking"};
+                String[] classLabels = {"Downstairs", "Sitting", "Standing", "Upstairs", "Walking"};
                 int maxIndex = 0;
                 for (int i = 1; i < outputVal[0].length; i++) {
                     if (outputVal[0][i] > outputVal[0][maxIndex]) {
@@ -79,12 +80,23 @@ public class MainActivity extends AppCompatActivity {
 
                 // Display the results
                 output.setText(result);
+
+
+                // Build a string to show all outputs
+                StringBuilder allOutputs = new StringBuilder();
+                for (int i = 0; i < outputVal[0].length; i++) {
+                    allOutputs.append(classLabels[i]).append(": ").append(String.format("%.8f", outputVal[0][i])).append("\n");
+                }
+
+                // Display all the outputs
+                output2.setText(allOutputs.toString());
+
             }
         });
     }
 
     private MappedByteBuffer loadModelFile() throws IOException {
-        AssetFileDescriptor fileDescriptor = this.getAssets().openFd("model.tflite");
+        AssetFileDescriptor fileDescriptor = this.getAssets().openFd("model_v2.tflite");
         FileInputStream inputStream = new FileInputStream(fileDescriptor.getFileDescriptor());
         FileChannel fileChannel = inputStream.getChannel();
         long startOffset = fileDescriptor.getStartOffset();
